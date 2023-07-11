@@ -1,0 +1,22 @@
+npx sequelize-cli db:migrate
+
+npx sequelize-cli model:generate --name Discount --attributes name:string,value:integer,start_date:dateonly,finish_date:dateonly
+npx sequelize-cli model:generate --name Brand --attributes name:string
+npx sequelize-cli model:generate --name Origin --attributes name:string
+npx sequelize-cli model:generate --name Color --attributes name:string,value:string
+npx sequelize-cli model:generate --name Size --attributes value:integer
+npx sequelize-cli model:generate --name Type --attributes name:string
+npx sequelize-cli model:generate --name Image --attributes value:blob
+npx sequelize-cli model:generate --name Status --attributes name:string
+npx sequelize-cli model:generate --name Role --attributes name:string
+npx sequelize-cli model:generate --name Address --attributes name:string
+npx sequelize-cli model:generate --name Product --attributes name:string,description:string,brandId:integer,discountId:integer,originId:integer,typeId:integer,statusId:integer
+npx sequelize-cli model:generate --name Product_image --attributes productId:integer,imageId:integer
+npx sequelize-cli model:generate --name Detail --attributes productId:integer,colorId:integer,sizeId:integer,quantity:integer,price:string
+npx sequelize-cli model:generate --name User --attributes email:string,password:string,name:string,phone:string,dateOfbirth:dateonly,gender:integer,avatar:blob,refreshToken:string,statusId:integer
+npx sequelize-cli model:generate --name User_role --attributes userId:integer,roleId:integer
+npx sequelize-cli model:generate --name User_address --attributes userId:integer,addressId:integer
+npx sequelize-cli model:generate --name Cart --attributes userId:integer,productId:integer,quantity:integer
+npx sequelize-cli model:generate --name Order --attributes customerId:integer,staffId:integer,paymentId:integer,total:integer,statusId:integer
+npx sequelize-cli model:generate --name Order_detail --attributes orderId:integer,productId:integer,quantity:integer
+npx sequelize-cli model:generate --name Payment --attributes name:string

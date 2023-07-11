@@ -15,10 +15,9 @@ module.exports = (sequelize, DataTypes) => {
   };
   Discount.init({
     name: DataTypes.STRING,
-    description: DataTypes.STRING,
     value: DataTypes.INTEGER,
-    start_date: DataTypes.DATE,
-    finish_date: DataTypes.DATE
+    start_date: DataTypes.DATEONLY,
+    finish_date: DataTypes.DATEONLY
   }, {
     sequelize,
     modelName: 'Discount',

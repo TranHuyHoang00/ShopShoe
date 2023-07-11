@@ -1,116 +1,147 @@
-import db, { Order } from '../models/index';
+import db from '../models/index';
 import { Op } from "sequelize";
-// Create Order
+let attributes = ['id', 'total', 'createdAt'];
+let include = [
+    {
+        model: db.User_address, attributes: ['id',],
+        include: [
+            { model: db.User, attributes: ['id', 'name', 'phone', 'email', 'gender', 'dateOfbirth', 'avatar'] },
+            { model: db.Address, attributes: ['id', 'name'] },
+        ]
+    },
+    { model: db.User, attributes: ['id', 'name'] },
+    { model: db.Status, attributes: ['id', 'name'] },
+    { model: db.Payment, attributes: ['id', 'name'] },
+]
+let getAllOrder = (check) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let dataStatus = [];
+            if (check.statusId == 0) { dataStatus = await db.Order.findAll({ include: include }) }
+            else {
+                dataStatus = await db.Order.findAll({ where: { statusId: check.statusId }, include: include })
+            }
+            let dataPayment = [];
+            if (check.paymentId == 0) { dataPayment = dataStatus }
+            else {
+                dataPayment = dataStatus.filter(obj => { return obj.paymentId == check.paymentId; });
+            }
+            let dataFilter = [];
+            if (check.filter == 1) { dataFilter = dataPayment.sort(function (a, b) { return b.id - a.id; }) }
+            if (check.filter == 2) { dataFilter = dataPayment.sort(function (a, b) { return a.id - b.id; }) }
+            if (check.filter == 3) { dataFilter = dataPayment.sort(function (a, b) { return b.total - a.total; }) }
+            if (check.filter == 4) { dataFilter = dataPayment.sort(function (a, b) { return a.total - b.total; }) }
+            let data = [];
+            data = dataFilter.splice((check.page * check.quantity), check.quantity);
+            resolve({
+                data,
+                errCode: 0,
+                errMessage: 'Thành công',
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+let getAllOrderByUser = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let data = await db.Order.findAll({
+                where: { customerId: { [Op.or]: userId } },
+                attributes: attributes,
+                include: include
+            })
+            resolve({
+                data,
+                errCode: 0,
+                errMessage: 'Thành công',
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 let createOrder = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log(data);
-            if (!data.total) {
-                resolve({
-                    errCode: 3,
-                    errMessage: 'Vui lòng chọn vé và số lượng'
-                })
-            } else {
-                if (!data.departure_date) {
+            let Order = await db.Order.create({
+                customerId: data.customerId,
+                paymentId: data.paymentId,
+                total: data.total,
+                statusId: data.statusId,
+            })
+            if (Order) {
+                try {
+                    for (const i of data.dataPrice) {
+                        await db.Order_detail.create({
+                            orderId: Order.id,
+                            productId: i.productId,
+                            quantity: i.quantity,
+                        })
+                    }
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Tạo thành công'
+                    })
+                } catch (e) {
+                    deleteOrderOther(Order.id)
                     resolve({
                         errCode: 4,
-                        errMessage: 'Vui lòng chọn ngày đi'
+                        errMessage: 'Tạo thất bại'
                     })
-                } else {
-                    let user = await db.User.findOne({
-                        where: { id: data.customerId, statusId: 2 }
-                    })
-                    if (user) {
-                        resolve({
-                            errCode: 6,
-                            errMessage: 'Tài khoản bạn đang bị khóa',
-                        })
-                    } else {
-                        let order = await db.Order.create({
-                            total: data.total,
-                            date_create: data.date_create,
-                            departure_date: data.departure_date,
-                            statusId: data.statusId,
-                            customerId: data.customerId,
-                            staffId: data.staffId,
-                            paymentId: data.paymentId,
-                        })
-                        if (order) {
-                            for (const i of data.ListTicket) {
-                                await db.Order_Tour_ticket.create({
-                                    orderId: order.id,
-                                    tour_ticket_Id: i.tour_ticket_Id,
-                                    quantity: i.quantity,
-                                })
-                            }
-                            resolve({
-                                errCode: 0,
-                                errMessage: 'Tạo thành công',
-                            })
-                        } else {
-                            resolve({
-                                errCode: 5,
-                                errMessage: 'Tạo thất bại',
-                            })
-                        }
-
-                    }
                 }
+            } else {
+                resolve({
+                    errCode: 3,
+                    errMessage: 'Tạo đơn thất bại'
+                })
             }
-
-
 
         } catch (e) {
             reject(e)
         }
     })
 }
-// Get All Order User
-let getAllOrderUser = (customerId) => {
+let deleteOrderOther = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!customerId) {
-                resolve({
-                    errCode: 2,
-                    errMessage: 'Thiếu Id khách hàng',
-                })
-            } else {
-                let user = await db.User.findOne({
-                    where: { id: customerId }
-                })
-                if (user) {
-                    let data = await db.Order.findAll({
-                        where: { customerId: customerId },
-                        attributes: ['id', 'total', 'departure_date', 'staffId', 'date_create', 'paymentId', 'createdAt'],
-                        include: [
-                            { model: db.Status, attributes: ['id', 'name'] },
-                            { model: db.User, attributes: ['id', 'email', 'name', 'phone', 'address', 'cccd', 'gender', 'dateOfbirth'] },
-                            {
-                                model: db.Order_Tour_ticket, attributes: ['id', 'quantity'],
-                                include: [
-                                    {
-                                        model: db.Tour_ticket, attributes: ['id'],
-                                        include: [
-                                            { model: db.Ticket, attributes: ['id', 'price', 'type'], },
-                                            { model: db.Tour, attributes: ['id', 'name'], }
-                                        ]
-                                    }
-                                ]
-                            },
-                        ],
-                    })
-                    resolve({
-                        data,
-                        errCode: 0,
-                        errMessage: 'Lấy thành công',
-                    })
-                } else {
+
+            await db.Order.destroy({
+                where: { id: id }
+            })
+            resolve({
+                errCode: 0,
+                errMessage: 'Xóa thành công'
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+let deleteOrder = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let Order = await db.Order.findOne({ where: { id: id } })
+            if (Order) {
+                if (Order.statusId == 5 || Order.statusId == 6 || Order.statusId == 7 || Order.statusId == 9) {
                     resolve({
                         errCode: 3,
-                        errMessage: 'Người dùng không tồn tại',
+                        errMessage: 'Không thể xóa'
+                    })
+                } if (Order.statusId == 8 || Order.statusId == 10) {
+                    await db.Order.destroy({
+                        where: { id: id }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Xóa thành công'
                     })
                 }
-
+            } else {
+                resolve({
+                    errCode: 2,
+                    errMessage: 'Không tìm thấy'
+                })
             }
         } catch (e) {
             reject(e)
@@ -120,32 +151,24 @@ let getAllOrderUser = (customerId) => {
 let editOrder = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.id) {
-                resolve({
-                    errCode: 2,
-                    errMessage: 'Thiếu Id order'
-                })
-            }
-            let order = await db.Order.findOne({
-                where: { id: data.id },
-                raw: false
+            let Order = await db.Order.findOne({
+                where: { id: data.id }
             })
-            if (order) {
-                order.total = data.total
-                order.departure_date = data.departure_date,
-                    order.statusId = data.statusId,
-                    order.customerId = data.customerId
-                order.staffId = data.staffId,
-                    order.paymentId = data.paymentId,
-                    await order.save();
+            if (Order) {
+                Order.customerId = data.customerId;
+                Order.paymentId = data.paymentId;
+                Order.statusId = data.statusId;
+                Order.staffId = data.staffId;
+                Order.total = data.total;
+                await Order.save();
                 resolve({
                     errCode: 0,
-                    errMessage: 'Sửa thành công'
+                    errMessage: 'Thành công'
                 })
             } else {
                 resolve({
-                    errCode: 3,
-                    errMessage: 'Order không tồn tại'
+                    errCode: 4,
+                    errMessage: 'Không tồn tại'
                 })
             }
         } catch (e) {
@@ -153,170 +176,64 @@ let editOrder = (data) => {
         }
     })
 }
-let RevenueStatistics_order = (dateStart, dateFinish) => {
+let getOneOrder = (id) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!dateStart) {
-                resolve({
-                    errCode: 2,
-                    errMessage: 'Vui lòng chọn thời gian',
-                })
-            }
-            if (!dateFinish) {
-                resolve({
-                    errCode: 3,
-                    errMessage: 'Vui lòng chọn thời gian',
-                })
-            }
-            let data = await Order.findAll({
-                where: {
-                    statusId: 5,
-                    departure_date: {
-                        [Op.gte]: dateStart,
-                        [Op.lte]: dateFinish
-                    }
-                },
-                attributes: ['id', 'total', 'departure_date', 'staffId', 'date_create', 'paymentId', 'createdAt'],
-                include: [
-                    { model: db.Status, attributes: ['id', 'name'] },
-                    { model: db.User, attributes: ['id', 'email', 'name', 'phone', 'address', 'cccd', 'gender', 'dateOfbirth'] },
-                    {
-                        model: db.Order_Tour_ticket, attributes: ['id', 'quantity'],
-                        include: [
-                            {
-                                model: db.Tour_ticket, attributes: ['id'],
-                                include: [
-                                    { model: db.Ticket, attributes: ['id', 'price', 'type'], },
-                                    { model: db.Tour, attributes: ['id', 'name'], }
-                                ]
-                            }
-                        ]
-                    },
-                ],
-            })
-            if (data) {
-                resolve({
-                    data: data,
-                    errCode: 0,
-                    errMessage: 'Thành công',
-                })
-            }
-        } catch (e) {
-            reject(e)
-        }
-    })
-}
-let getAllOrderbyStatus = (statusId) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!statusId) {
-                resolve({
-                    errCode: 2,
-                    errMessage: 'Thiếu Id Status',
-                })
-            }
-            if (statusId == 'All') {
-                let data = await db.Order.findAll({
-                    attributes: ['id', 'total', 'departure_date', 'staffId', 'date_create', 'paymentId', 'createdAt'],
-                    include: [
-                        { model: db.Status, attributes: ['id', 'name'] },
-                        { model: db.User, attributes: ['id', 'email', 'name', 'phone', 'address', 'cccd', 'gender', 'dateOfbirth'] },
-                        {
-                            model: db.Order_Tour_ticket, attributes: ['id', 'quantity'],
-                            include: [
-                                {
-                                    model: db.Tour_ticket, attributes: ['id'],
-                                    include: [
-                                        { model: db.Ticket, attributes: ['id', 'price', 'type'], },
-                                        { model: db.Tour, attributes: ['id', 'name'], }
-                                    ]
-                                }
-                            ]
-                        },
-                    ],
-                })
-                resolve({
-                    data,
-                    errCode: 0,
-                    errMessage: 'Lấy thành công',
-                })
-            } else {
-                let data = await db.Order.findAll({
-                    where: { statusId: statusId },
-                    attributes: ['id', 'total', 'departure_date', 'staffId', 'date_create', 'paymentId', 'createdAt'],
-                    include: [
-                        { model: db.Status, attributes: ['id', 'name'] },
-                        { model: db.User, attributes: ['id', 'email', 'name', 'phone', 'address', 'cccd', 'gender', 'dateOfbirth'] },
-                        {
-                            model: db.Order_Tour_ticket, attributes: ['id', 'quantity'],
-                            include: [
-                                {
-                                    model: db.Tour_ticket, attributes: ['id'],
-                                    include: [
-                                        { model: db.Ticket, attributes: ['id', 'price', 'type'], },
-                                        { model: db.Tour, attributes: ['id', 'name'], }
-                                    ]
-                                }
-                            ]
-                        },
-                    ],
-                })
-                resolve({
-                    data,
-                    errCode: 0,
-                    errMessage: 'Lấy thành công',
-                })
-            }
-
-        } catch (e) {
-            reject(e)
-        }
-    })
-}
-let deleteOrder = (id) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            if (!id) {
-                resolve({
-                    errCode: 2,
-                    errMessage: 'Thiếu id order'
-                })
-            }
             let data = await db.Order.findOne({
-                where: { id: id }
+                where: { id: id },
+                attributes: attributes,
+                include: include,
             })
-            if (data) {
-                if (data.statusId == 5 || data.statusId == 7) {
-                    await db.Order.destroy({
-                        where: { id: id }
-                    })
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Xóa đơn đặt thành công'
-                    })
-                } else {
-                    resolve({
-                        errCode: 4,
-                        errMessage: 'Không thể xóa đơn đặt'
-                    })
-                }
-            } else {
-                resolve({
-                    errCode: 3,
-                    errMessage: 'Không tồn tại đơn đặt'
+            resolve({
+                data,
+                errCode: 0,
+                errMessage: 'Thành công',
+            })
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+let Statistical = (check) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let dataStatus = [];
+            if (check.statusId == 0) {
+                dataStatus = await db.Order.findAll({
+                    where: { createdAt: { [Op.gte]: check.date[0], [Op.lte]: check.date[1] } }, include: include
                 })
             }
-
+            else {
+                dataStatus = await db.Order.findAll({ where: { statusId: check.statusId, createdAt: { [Op.gte]: check.date[0], [Op.lte]: check.date[1] } }, include: include })
+            }
+            let dataPayment = [];
+            if (check.paymentId == 0) { dataPayment = dataStatus }
+            else {
+                dataPayment = dataStatus.filter(obj => { return obj.paymentId == check.paymentId; });
+            }
+            let dataFilter = [];
+            if (check.filter == 1) { dataFilter = dataPayment.sort(function (a, b) { return b.id - a.id; }) }
+            if (check.filter == 2) { dataFilter = dataPayment.sort(function (a, b) { return a.id - b.id; }) }
+            if (check.filter == 3) { dataFilter = dataPayment.sort(function (a, b) { return b.total - a.total; }) }
+            if (check.filter == 4) { dataFilter = dataPayment.sort(function (a, b) { return a.total - b.total; }) }
+            let data = [];
+            data = dataFilter.splice((check.page * check.quantity), check.quantity);
+            resolve({
+                data,
+                errCode: 0,
+                errMessage: 'Thành công',
+            })
         } catch (e) {
             reject(e)
         }
     })
 }
 module.exports = {
+    getAllOrder: getAllOrder,
+    getAllOrderByUser: getAllOrderByUser,
     createOrder: createOrder,
-    getAllOrderUser: getAllOrderUser,
+    deleteOrder: deleteOrder,
     editOrder: editOrder,
-    RevenueStatistics_order: RevenueStatistics_order,
-    getAllOrderbyStatus: getAllOrderbyStatus,
-    deleteOrder: deleteOrder
+    getOneOrder: getOneOrder,
+    Statistical: Statistical,
 }

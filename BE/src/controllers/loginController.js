@@ -1,15 +1,16 @@
-import loginService from '../services/loginService'
+import LoginService from '../services/LoginService'
 
 let handleLogin = async (req, res) => {
     try {
-        if (!req.body.email || !req.body.password) {
-            return res.status(200).json({
+        if (!req.body.phone || !req.body.password) {
+            return res.status(400).json({
                 errCode: 1,
-                errMessage: 'Không được bỏ trống email và password',
+                errMessage: 'Thiếu thông tin',
             });
+        } else {
+            let result = await LoginService.login(req.body.phone, req.body.password);
+            return res.status(200).json(result);
         }
-        let result = await loginService.login(req.body.email, req.body.password);
-        return res.status(200).json(result);
     } catch (e) {
         return res.status(501).json({
             errCode: 2,
@@ -26,7 +27,7 @@ let handleRefreshToken = async (req, res) => {
                 errMessage: 'Không tìm thấy Refresh token hoặc Access token',
             });
         }
-        let result = await loginService.refresh(req.body.refreshToken, req.headers.x_authorization);
+        let result = await LoginService.refresh(req.body.refreshToken, req.headers.x_authorization);
         return res.status(200).json(result);
     } catch (e) {
         return res.status(501).json({

@@ -1,32 +1,33 @@
 import db from '../models/index';
 import bcrypt from 'bcryptjs';
-import randToken from 'rand-token';
-
 import { generateToken, decodeToken } from '../auth/auth'
 
-let login = (email, password) => {
+let login = (phone, password) => {
     return new Promise(async (resolve, reject) => {
         try {
+            if (phone.length != 10) { resolve({ errCode: 3, errMessage: 'Số điện thoại phải là 10 số' }) }
+            if (password.length <= 5) { resolve({ errCode: 4, errMessage: 'Mật khẩu phải > 5 kí tự' }) }
             let user = await db.User.findOne({
-                where: { email: email },
+                where: { phone: phone },
                 include: [
-                    { model: db.Role, as: "roles", attributes: ['id'], through: { attributes: [], } },
-                    { model: db.Status, attributes: ['id', 'name'] }
+                    { model: db.Role, as: "roles", attributes: ['id', 'name', 'type'], through: { attributes: [], } },
+                    { model: db.Status, attributes: ['id', 'name'] },
+                    { model: db.Address, as: "addresses", attributes: ['id', 'name'], through: { attributes: [], } },
+
                 ]
             })
             if (!user) {
                 resolve({
                     errCode: 3,
-                    errMessage: 'Email không tồn tại'
+                    errMessage: 'Tài khoản không tồn tại'
                 })
             } else {
                 let checkPassWord = await bcrypt.compareSync(password, user.password);
                 let payload = {
                     id: user.id,
-                    email: user.email
+                    phone: user.phone
                 }
                 if (checkPassWord == true) {
-                    // Tạo access token
                     let accessToken = await generateToken(
                         payload,
                         process.env.ACCESS_TOKEN_SECRET,
@@ -39,7 +40,6 @@ let login = (email, password) => {
                             errMessage: 'Tạo access token thất bại'
                         })
                     } else {
-                        // tạo refresh token
                         let refreshToken = await generateToken(
                             payload,
                             process.env.REFRESH_TOKEN_SECRET,
@@ -65,7 +65,6 @@ let login = (email, password) => {
                     })
                 }
             }
-
         } catch (e) {
             reject(e)
         }
@@ -85,7 +84,7 @@ let refresh = (refreshTokenFromBody, accessTokenFromHeader) => {
                 })
             } else {
                 let user = await db.User.findOne({
-                    where: { email: decoded.payload.email },
+                    where: { phone: decoded.payload.phone },
                 })
                 if (!user) {
                     resolve({
@@ -100,7 +99,7 @@ let refresh = (refreshTokenFromBody, accessTokenFromHeader) => {
                         })
                     } else {
                         let accessToken = await generateToken(
-                            { email: decoded.payload.email },
+                            { phone: decoded.payload.phone },
                             process.env.ACCESS_TOKEN_SECRET,
                             process.env.ACCESS_TOKEN_LIFE,
                         );

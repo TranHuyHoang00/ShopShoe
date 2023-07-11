@@ -1,8 +1,90 @@
-import orderService from '../services/orderService'
+import OrderService from '../services/OrderService'
 
-let handleCreateOrder = async (req, res) => {
+let handleGetAllOrder = async (req, res,) => {
     try {
-        let result = await orderService.createOrder(req.body);
+        if (!req.body) {
+            return res.status(400).json({
+                errCode: 1,
+                errMessage: 'Thiếu thông tin',
+            })
+        } else {
+            let result = await OrderService.getAllOrder(req.body);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
+}
+let handleGetAllOrderByUser = async (req, res,) => {
+    try {
+        if (!req.body || req.body.length == 0) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu Id user',
+            })
+        } else {
+            let result = await OrderService.getAllOrderByUser(req.body);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
+}
+let handleCreateOrder = async (req, res,) => {
+    try {
+        if (!req.body.customerId || !req.body.paymentId || !req.body.total || !req.body.statusId || req.body.dataPrice.length == 0) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu thông tin',
+            })
+        } else {
+            let result = await OrderService.createOrder(req.body);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
+}
+let handleDeleteOrder = async (req, res,) => {
+    try {
+        if (!req.body.id) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu Id',
+            })
+        } else {
+            let result = await OrderService.deleteOrder(req.body.id);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
+}
+let handleEditOrder = async (req, res) => {
+    try {
+        if (!req.body.id) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu thông tin',
+            })
+        }
+        let result = await OrderService.editOrder(req.body);
         return res.status(200).json(result);
     } catch (e) {
         return res.status(501).json({
@@ -12,10 +94,17 @@ let handleCreateOrder = async (req, res) => {
         })
     }
 }
-let handleGetAllOrderUser = async (req, res,) => {
+let handleGetOneOrder = async (req, res,) => {
     try {
-        let result = await orderService.getAllOrderUser(req.query.customerId);
-        return res.status(200).json(result);
+        if (!req.query.id) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu Id',
+            })
+        } else {
+            let result = await OrderService.getOneOrder(req.query.id);
+            return res.status(200).json(result);
+        }
     } catch (e) {
         return res.status(501).json({
             errCode: 1,
@@ -24,49 +113,18 @@ let handleGetAllOrderUser = async (req, res,) => {
         })
     }
 }
-let handleEditOrder = async (req, res,) => {
+let handleStatistical = async (req, res,) => {
     try {
-        let result = await orderService.editOrder(req.body);
-        return res.status(200).json(result);
+        if (!req.body) {
+            return res.status(400).json({
+                errCode: 1,
+                errMessage: 'Thiếu thông tin',
+            })
+        } else {
+            let result = await OrderService.Statistical(req.body);
+            return res.status(200).json(result);
+        }
     } catch (e) {
-        return res.status(501).json({
-            errCode: 1,
-            errMessage: 'Lỗi server',
-            error: e
-        })
-    }
-}
-let handleRevenueStatistics_order = async (req, res,) => {
-    try {
-        let result = await orderService.RevenueStatistics_order(req.query.dateStart, req.query.dateFinish);
-        return res.status(200).json(result);
-    } catch (e) {
-        return res.status(501).json({
-            errCode: 1,
-            errMessage: 'Lỗi server',
-            error: e
-        })
-    }
-}
-let handleGetAllOrderbyStatus = async (req, res,) => {
-    try {
-        let result = await orderService.getAllOrderbyStatus(req.query.statusId);
-        return res.status(200).json(result);
-    } catch (e) {
-        return res.status(501).json({
-            errCode: 1,
-            errMessage: 'Lỗi server',
-            error: e
-        })
-    }
-}
-
-let handleDeleteOrder = async (req, res) => {
-    try {
-        let result = await orderService.deleteOrder(req.body.id);
-        return res.status(200).json(result);
-    } catch (e) {
-        orderService.deleteOrder_OTt()
         return res.status(501).json({
             errCode: 1,
             errMessage: 'Lỗi server',
@@ -75,10 +133,11 @@ let handleDeleteOrder = async (req, res) => {
     }
 }
 module.exports = {
+    handleGetAllOrder: handleGetAllOrder,
+    handleGetAllOrderByUser: handleGetAllOrderByUser,
     handleCreateOrder: handleCreateOrder,
-    handleGetAllOrderUser: handleGetAllOrderUser,
-    handleEditOrder: handleEditOrder,
-    handleRevenueStatistics_order: handleRevenueStatistics_order,
-    handleGetAllOrderbyStatus: handleGetAllOrderbyStatus,
     handleDeleteOrder: handleDeleteOrder,
+    handleEditOrder: handleEditOrder,
+    handleGetOneOrder: handleGetOneOrder,
+    handleStatistical: handleStatistical,
 }

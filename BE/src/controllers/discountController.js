@@ -1,8 +1,8 @@
-import discountService from '../services/discountsService'
+import DiscountService from '../services/DiscountService'
 
-let handleGetAllDiscounts = async (req, res,) => {
+let handleGetAllDiscount = async (req, res,) => {
     try {
-        let result = await discountService.getAllDiscounts();
+        let result = await DiscountService.getAllDiscount();
         return res.status(200).json(result);
     } catch (e) {
         return res.status(501).json({
@@ -14,7 +14,51 @@ let handleGetAllDiscounts = async (req, res,) => {
 }
 let handleCreateDiscount = async (req, res,) => {
     try {
-        let result = await discountService.CreateDiscount(req.body);
+        if (!req.body.value) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu thông tin',
+            })
+        } else {
+            let result = await DiscountService.createDiscount(req.body);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
+}
+let handleDeleteDiscount = async (req, res,) => {
+    try {
+        if (!req.body.id) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu Id',
+            })
+        } else {
+            let result = await DiscountService.deleteDiscount(req.body.id);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
+}
+let handleEditDiscount = async (req, res) => {
+    try {
+        if (!req.body.id || !req.body.value) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu thông tin',
+            })
+        }
+        let result = await DiscountService.editDiscount(req.body);
         return res.status(200).json(result);
     } catch (e) {
         return res.status(501).json({
@@ -24,12 +68,29 @@ let handleCreateDiscount = async (req, res,) => {
         })
     }
 }
-let handleDeleteDiscount = async (req, res) => {
-    let message = await discountService.deleteDiscount(req.body.id);
-    return res.status(200).json(message)
+let handleSearchDiscount = async (req, res,) => {
+    try {
+        if (!req.query.text) {
+            return res.status(400).json({
+                errCode: 2,
+                errMessage: 'Thiếu text',
+            })
+        } else {
+            let result = await DiscountService.searchDiscount(req.query.text);
+            return res.status(200).json(result);
+        }
+    } catch (e) {
+        return res.status(501).json({
+            errCode: 1,
+            errMessage: 'Lỗi server',
+            error: e
+        })
+    }
 }
 module.exports = {
-    handleGetAllDiscounts: handleGetAllDiscounts,
+    handleGetAllDiscount: handleGetAllDiscount,
     handleCreateDiscount: handleCreateDiscount,
     handleDeleteDiscount: handleDeleteDiscount,
+    handleEditDiscount: handleEditDiscount,
+    handleSearchDiscount: handleSearchDiscount,
 }

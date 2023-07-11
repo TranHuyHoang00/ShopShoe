@@ -1,21 +1,20 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
+import ReactDOM from 'react-dom';
+import "./styles/index.css";
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { BrowserRouter } from "react-router-dom";
-import { Provider } from 'react-redux'
-import reduxStore, { persistor } from './redux';
-import '@fortawesome/fontawesome-free/css/all.min.css';
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+import { BrowserRouter, } from "react-router-dom";
+import { Provider } from 'react-redux';
+import reduxStore from './store/redux';
+ReactDOM.render(
   <React.StrictMode>
-    <BrowserRouter>
-      <Provider store={reduxStore}>
-        <App persistor={persistor} />
-      </Provider>
-    </BrowserRouter>
-  </React.StrictMode>
+    <Provider store={reduxStore}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </Provider>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function
