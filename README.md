@@ -1,1 +1,1 @@
-# Please switch to the `master` branch to view the code.
+# Please switch to the 'master' branch to view the code.
