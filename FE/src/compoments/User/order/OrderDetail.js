@@ -16,7 +16,7 @@ class OrderDetail extends React.Component {
     }
     async componentDidMount() {
         if (this.props.match && this.props.match.params) {
-            let infor = JSON.parse(window.localStorage.getItem('staffAccount'));
+            let infor = JSON.parse(window.localStorage.getItem('customerAccount'));
             let token = infor.data.accessToken;
             let id = this.props.match.params.id;
             await this.getOneOrder(id, token);

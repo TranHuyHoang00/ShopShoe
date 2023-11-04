@@ -79,7 +79,7 @@ class Header extends React.Component {
                 <div className='flex items-center justify-between py-[5px] sm:py-[10px] bg-white px-[10px] sm:px-[30px] lg:px-[60px] space-x-[6px] sm:space-x-[20px]'>
                     <div onClick={() => this.onClickPage('home')}
                         className=' text-[16px] sm:text-[26px] md:text-[30px] text-[#595959] cursor-pointer'>
-                        <h1 className='font-serif font-[900] '>AME</h1>
+                        <h1 className='font-serif font-[900] '>SenDo</h1>
                     </div>
                     <div className='hidden md:flex  md:text-[14px] lg:text-[16px] '>
                         <AutoComplete style={{ width: 400, }}

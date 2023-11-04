@@ -15,7 +15,7 @@ class Order extends React.Component {
         }
     }
     async componentDidMount() {
-        let infor = JSON.parse(window.localStorage.getItem('staffAccount'));
+        let infor = JSON.parse(window.localStorage.getItem('customerAccount'));
         this.setState({ accessToken: infor.data.accessToken })
         await this.getOneUser();
         await this.getAllOrderByUser()

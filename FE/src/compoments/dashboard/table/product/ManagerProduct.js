@@ -3,7 +3,7 @@ import { withRouter } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { AiOutlineEye, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
 import { getAllProduct, deleteProduct } from '../../../../services/ProductService';
-import { Carousel } from 'antd';
+import { Carousel, Pagination } from 'antd';
 class ManagerProduct extends Component {
     constructor(props) {
         super(props);
@@ -13,16 +13,17 @@ class ManagerProduct extends Component {
             textSearch: '',
             dataEdit: {},
             accessToken: '',
+            check: { type: 0, filter: 1, quantity: 4, page: 0 }
         }
     }
     async componentDidMount() {
         let infor = JSON.parse(window.localStorage.getItem('staffAccount'));
         this.setState({ accessToken: infor.data.accessToken })
-        await this.getAllProduct();
+        await this.getAllProduct(this.state.check);
     }
-    getAllProduct = async () => {
+    getAllProduct = async (check) => {
         try {
-            let data = await getAllProduct({ type: 0, filter: 1, quantity: 8, page: 0 });
+            let data = await getAllProduct(check);
             if (data && data.data && data.data.errCode == 0) {
                 this.setState({ dataProduct: data.data.data })
             } else {
@@ -50,6 +51,11 @@ class ManagerProduct extends Component {
         if (page == 'detail') { this.props.history.push(`/home/product/${id}`) }
         if (page == 'edit') { this.props.history.push(`product/${page}/${id}`) }
 
+    }
+    onChangePage = async (event) => {
+        let check = this.state.check;
+        check.page = event - 1;
+        await this.getAllProduct(check);
     }
     render() {
         let dataProduct = this.state.dataProduct;
@@ -98,6 +104,8 @@ class ManagerProduct extends Component {
                         </div>
                     </div>
                 </div>
+                <Pagination defaultCurrent={this.state.check.page + 1} total={10} pageSize={2}
+                    onChange={(event) => this.onChangePage(event)} />
             </>
         );
     }

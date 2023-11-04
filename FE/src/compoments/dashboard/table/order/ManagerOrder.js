@@ -30,6 +30,7 @@ class ManagerOrder extends Component {
     getAllOrder = async (check, token) => {
         try {
             let data = await getAllOrder(check, token);
+            console.log('data');
             if (data && data.data && data.data.errCode == 0) {
                 this.setState({ dataOrder: data.data.data })
             } else {

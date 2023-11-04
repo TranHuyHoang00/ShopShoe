@@ -12,7 +12,7 @@ class Main extends React.Component {
         return (
             <div className='space-y-[10px] mx-[10px] sm:mx-[30px] lg:mx-[50px]'>
                 <Banner />
-                <Menu />
+                {/* <Menu /> */}
                 <MenuCarousel />
             </div>
         )

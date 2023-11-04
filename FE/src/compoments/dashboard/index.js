@@ -33,19 +33,36 @@ import UserCreate from './table/user/UserCreate';
 
 import PersonalPage from './element/PersonalPage';
 import HeaderDB from './element/HeaderDB';
+import { info } from 'autoprefixer';
 class index extends Component {
     constructor(props) {
         super(props);
         this.state = {
             collapsed: false,
             url: '/dashboard/',
+            listRole: [],
         }
     }
     async componentDidMount() {
-    }
-    getItem = (label, key, icon, children) => { return { key, icon, children, label, }; }
-    setCollapsed = () => { this.setState({ collapsed: !this.state.collapsed }) }
+        let infor = JSON.parse(window.localStorage.getItem('staffAccount'));
+        if (infor && infor.data) {
+            let roleRaw = infor.data.user.roles;
+            let roleCurrent = []
+            for (const i of roleRaw) {
+                roleCurrent.push(i.id);
+            }
+            
+            this.setState({ listRole: roleCurrent })
+        } else {
+            this.setState({ listRole: [] })
+        }
 
+    }
+    getItem = (label, key, icon, children) => {
+
+        return { key, icon, children, label, };
+    }
+    setCollapsed = () => { this.setState({ collapsed: !this.state.collapsed }) }
     onClickPage = (value) => {
         this.props.history.push(`/dashboard/${value.key}`)
     }
@@ -70,6 +87,8 @@ class index extends Component {
         ];
         const { Header, Content, Footer, Sider } = Layout;
         let url = this.state.url;
+        let listRole = this.state.listRole;
+
         return (
             <Layout style={{ minHeight: '100vh', }} >
                 <Sider
@@ -82,31 +101,93 @@ class index extends Component {
                         <HeaderDB />
                     </Header>
                     <Content className='py-[10px]'>
-                        <Switch>
-                            <Route path={`${url}brand`}><ManagerBrand /></Route>
-                            <Route path={`${url}color`}><ManagerColor /></Route>
-                            <Route path={`${url}discount`}><ManagerDiscount /></Route>
-                            <Route path={`${url}origin`}><ManagerOrigin /></Route>
-                            <Route path={`${url}role`}><ManagerRole /></Route>
-                            <Route path={`${url}size`}><ManagerSize /></Route>
-                            <Route path={`${url}status`}><ManagerStatus /></Route>
-                            <Route path={`${url}type`}><ManagerType /></Route>
+                        {listRole.length !== 0 ?
+                            <>
+                                {listRole && listRole.map((item, index) => {
+                                    return (
+                                        <>
+                                            {/* Admin */}
+                                            {item == 1 ?
+                                                <Switch>
+                                                    <Route path={`${url}brand`}><ManagerBrand /></Route>
+                                                    <Route path={`${url}color`}><ManagerColor /></Route>
+                                                    <Route path={`${url}discount`}><ManagerDiscount /></Route>
+                                                    <Route path={`${url}origin`}><ManagerOrigin /></Route>
+                                                    <Route path={`${url}role`}><ManagerRole /></Route>
+                                                    <Route path={`${url}size`}><ManagerSize /></Route>
+                                                    <Route path={`${url}status`}><ManagerStatus /></Route>
+                                                    <Route path={`${url}type`}><ManagerType /></Route>
+                                                    <Route exact path={`${url}product`}><ManagerProduct /></Route>
+                                                    <Route exact path={`${url}product/create`}><ProductCreate /></Route>
+                                                    <Route exact path={`${url}product/edit/:id`}><ProductEdit /></Route>
+                                                    <Route exact path={`${url}order`}><ManagerOrder /></Route>
+                                                    <Route exact path={`${url}order/:id`}><OrderDetail /></Route>
+                                                    <Route exact path={`${url}statistical/order`}><StatisticalOrder /></Route>
+                                                    <Route exact path={`${url}user`}><ManagerUser /></Route>
+                                                    <Route exact path={`${url}user/create`}><UserCreate /></Route>
+                                                    <Route exact path={`${url}user/:id`}><UserDetail /></Route>
+                                                    <Route exact path={`${url}user/edit/:id`}><UserEdit /></Route>
+                                                    <Route exact path={`${url}infor`}><PersonalPage /></Route>
+                                                </Switch>
+                                                :
+                                                <>
+                                                    {/* Kho */}
+                                                    {item == 4 &&
+                                                        <Switch>
+                                                            <Route path={`${url}brand`}><ManagerBrand /></Route>
+                                                            <Route path={`${url}color`}><ManagerColor /></Route>
+                                                            <Route path={`${url}origin`}><ManagerOrigin /></Route>
+                                                            <Route path={`${url}size`}><ManagerSize /></Route>
+                                                            <Route path={`${url}type`}><ManagerType /></Route>
+                                                            <Route exact path={`${url}product`}><ManagerProduct /></Route>
+                                                            <Route exact path={`${url}product/create`}><ProductCreate /></Route>
+                                                            <Route exact path={`${url}product/edit/:id`}><ProductEdit /></Route>
+                                                            <Route exact path={`${url}infor`}><PersonalPage /></Route>
+                                                        </Switch>
+                                                    }
+                                                    {/* Thu ngân */}
+                                                    {item == 3 &&
+                                                        <Switch>
+                                                            <Route exact path={`${url}order`}><ManagerOrder /></Route>
+                                                            <Route exact path={`${url}order/:id`}><OrderDetail /></Route>
+                                                            <Route exact path={`${url}statistical/order`}><StatisticalOrder /></Route>
+                                                            <Route exact path={`${url}infor`}><PersonalPage /></Route>
+                                                        </Switch>
+                                                    }
+                                                    {/* Quản lý */}
+                                                    {item == 2 &&
+                                                        <Switch>
+                                                            <Route path={`${url}brand`}><ManagerBrand /></Route>
+                                                            <Route path={`${url}color`}><ManagerColor /></Route>
+                                                            <Route path={`${url}discount`}><ManagerDiscount /></Route>
+                                                            <Route path={`${url}origin`}><ManagerOrigin /></Route>
+                                                            <Route path={`${url}role`}><ManagerRole /></Route>
+                                                            <Route path={`${url}size`}><ManagerSize /></Route>
+                                                            <Route path={`${url}status`}><ManagerStatus /></Route>
+                                                            <Route path={`${url}type`}><ManagerType /></Route>
+                                                            <Route exact path={`${url}product`}><ManagerProduct /></Route>
+                                                            <Route exact path={`${url}product/create`}><ProductCreate /></Route>
+                                                            <Route exact path={`${url}product/edit/:id`}><ProductEdit /></Route>
+                                                            <Route exact path={`${url}order`}><ManagerOrder /></Route>
+                                                            <Route exact path={`${url}order/:id`}><OrderDetail /></Route>
+                                                            <Route exact path={`${url}statistical/order`}><StatisticalOrder /></Route>
+                                                            <Route exact path={`${url}user`}><ManagerUser /></Route>
+                                                            <Route exact path={`${url}user/:id`}><UserDetail /></Route>
+                                                            <Route exact path={`${url}user/edit/:id`}><UserEdit /></Route>
+                                                            <Route exact path={`${url}infor`}><PersonalPage /></Route>
+                                                        </Switch>
+                                                    }
+                                                </>
+                                            }
+                                        </>
+                                    )
+                                })}
 
-                            <Route exact path={`${url}product`}><ManagerProduct /></Route>
-                            <Route exact path={`${url}product/create`}><ProductCreate /></Route>
-                            <Route exact path={`${url}product/edit/:id`}><ProductEdit /></Route>
+                            </>
+                            :
+                            <></>
+                        }
 
-                            <Route exact path={`${url}order`}><ManagerOrder /></Route>
-                            <Route exact path={`${url}order/:id`}><OrderDetail /></Route>
-                            <Route exact path={`${url}statistical/order`}><StatisticalOrder /></Route>
-
-                            <Route exact path={`${url}user`}><ManagerUser /></Route>
-                            <Route exact path={`${url}user/create`}><UserCreate /></Route>
-                            <Route exact path={`${url}user/:id`}><UserDetail /></Route>
-                            <Route exact path={`${url}user/edit/:id`}><UserEdit /></Route>
-
-                            <Route path={`${url}infor`}><PersonalPage /></Route>
-                        </Switch>
                     </Content>
                 </Layout>
             </Layout>

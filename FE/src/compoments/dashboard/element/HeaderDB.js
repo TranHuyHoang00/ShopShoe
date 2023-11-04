@@ -18,6 +18,8 @@ class HeaderDB extends React.Component {
     }
     onClickPage = (input) => {
         if (input == 'home') { this.props.history.push(`/${input}`) }
+
+        if (input == 'login') { this.props.history.push(`/${input}`) }
         if (input == 'infor') { this.props.history.push(`/dashboard/${input}`) }
     }
     handleLogout = () => {
@@ -34,7 +36,7 @@ class HeaderDB extends React.Component {
             <div className='flex items-center justify-between'>
                 <div onClick={() => this.onClickPage('home')}
                     className=' text-[16px] sm:text-[26px] md:text-[30px] text-[#595959] cursor-pointer'>
-                    <h1 className='font-serif font-[900] '>AME</h1>
+                    <h1 className='font-serif font-[900] '>SenDo</h1>
                 </div>
                 {infor == null ?
                     <Button onClick={() => this.onClickPage('login')}

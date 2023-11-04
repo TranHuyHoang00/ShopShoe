@@ -113,19 +113,19 @@ class register extends React.Component {
                     </div>
                     <div className='text-white font-[500] text-[16px] sm:text-[18px] md:pb-[20px]'>
                         <button onClick={() => this.handleCreateAccount()}
-                            className='bg-[#35c235] w-[300px] h-[40px] rounded-[5px] '>
+                            className='bg-[#202020] w-[300px] h-[40px] rounded-[5px] '>
                             Đăng ký
                         </button>
                     </div>
                     <div className='text-white font-[500] text-[16px] sm:text-[18px] space-x-[10px]'>
                         <button onClick={() => this.onClickPage('login')}
-                            className='bg-[#1b76f4] w-[300px] h-[40px] rounded-[5px] '>
+                            className='bg-[#202020] w-[300px] h-[40px] rounded-[5px] '>
                             Đăng nhập ngay
                         </button>
                     </div>
                     <div className='text-white font-[500] text-[16px] sm:text-[18px]'>
                         <button onClick={() => this.onClickPage('home')}
-                            className='bg-[#db0001] w-[300px] h-[40px] rounded-[5px] '>
+                            className='bg-[#202020] w-[300px] h-[40px] rounded-[5px] '>
                             Quay về trang chủ
                         </button>
                     </div>

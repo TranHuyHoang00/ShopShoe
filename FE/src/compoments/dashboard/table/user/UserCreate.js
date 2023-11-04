@@ -13,6 +13,7 @@ class UserCreate extends React.Component {
             is_showPassword: false,
             dataRole: [],
             dataCreate: {
+                gender: 0,
                 statusId: 1,
                 avatar: 'a.jpg',
                 ListRole: []
@@ -139,7 +140,8 @@ class UserCreate extends React.Component {
                         </div>
                         <div className='md:text-left'>
                             <span className='text-[14px] text-[#bdc3d4]'>Giới tính *</span><br />
-                            <select onChange={(event) => this.handleOnChangeInput(event, 'gender')}
+                            <select value={this.state.dataCreate.gender}
+                                onChange={(event) => this.handleOnChangeInput(event, 'gender')}
                                 className='w-[200px] sm:w-[300px] h-[40px] rounded-[5px] border px-[20px]
                      shadow-md' >
                                 <option></option>
@@ -150,8 +152,8 @@ class UserCreate extends React.Component {
                     </div>
                     <div className='md:flex md:space-x-[10px] md:space-y-0 space-y-[10px] '>
                         <div className='md:text-left text-[#bdc3d4]'>
-                            <span className=' text-[14px]  '>Vai trò *</span><br />
-                            <Select className='w-[200px] sm:w-[300px] h-[40px]'
+                            <span className=' text-[14px] text-red-500 '>Vai trò *</span><br />
+                            <Select className='w-[200px] sm:w-[300px] h-[40px] '
                                 mode="tags" allowClear maxTagCount='responsive'
                                 placeholder="Chọn phân quyền" size='large'
                                 onChange={(event) => this.onChangeRole(event)}
@@ -159,9 +161,10 @@ class UserCreate extends React.Component {
                             />
                         </div>
                         <div className='md:text-left'>
-                            <span className='text-[14px] text-[#bdc3d4]'>Trạng thái *</span><br />
-                            <select onChange={(event) => this.handleOnChangeInput(event, 'statusId')}
-                                className='w-[200px] sm:w-[300px] h-[40px] rounded-[5px] border px-[20px]shadow-md' >
+                            <span className='text-[14px] text-red-500'>Trạng thái *</span><br />
+                            <select value={this.state.dataCreate.statusId}
+                                onChange={(event) => this.handleOnChangeInput(event, 'statusId')}
+                                className='w-[200px] sm:w-[300px] h-[40px] rounded-[5px] border px-[20px] shadow-md' >
                                 <option value='1'>Hoạt động</option>
                                 <option value='2'>Khóa</option>
                             </select>
